@@ -1,5 +1,13 @@
 package com.example.senlapractice.presentation.navigation
 
-sealed class Screen(val route: String) {
-    data object MovieList : Screen("movie_list")
+import androidx.compose.runtime.Stable
+import kotlinx.serialization.Serializable
+
+@Stable
+@Serializable
+sealed class Screen {
+
+    @Stable
+    @Serializable
+    data object MovieList : Screen()
 }
