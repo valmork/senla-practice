@@ -1,0 +1,29 @@
+# Gradle - файлы сборки
+build/
+.gradle/
+
+# Android Studio - файлы проекта и настройки
+.idea/
+*.iml
+*.iws
+*.ipr
+*.idea_modules/
+
+# Локальные настройки (пути к SDK)
+local.properties
+
+# Отладочные ключи (debug keystore)
+*.jks
+*.keystore
+!debug.keystore
+
+# Временные файлы и кэш
+*.class
+*.apk
+*.aar
+*.aab
+*.dex
+*.log
+*.tmp
+*.class
+.DS_Store
