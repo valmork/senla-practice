@@ -1,4 +1,4 @@
-package com.example.senlapractice.ui.theme
+package com.example.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
