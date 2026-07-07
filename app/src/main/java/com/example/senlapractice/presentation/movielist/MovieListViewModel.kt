@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,10 +36,8 @@ class MovieListViewModel @Inject constructor(
         getPopularMoviesUseCase()
             .onEach { result ->
                 result.fold(
-                    onSuccess = { response ->
-                        _state.update {
-                            it.copy(isLoading = false, movies = response.results)
-                        }
+                    onSuccess = { movies ->
+                        _state.update { it.copy(isLoading = false, movies = movies) }
                     },
                     onFailure = { throwable ->
                         _state.update {

@@ -29,6 +29,7 @@ import coil.compose.AsyncImage
 import com.example.core.ui.theme.SenlaPracticeTheme
 import com.example.senlapractice.data.MovieDto
 import com.example.senlapractice.data.TmdbConfig
+import com.example.senlapractice.domain.model.Movie
 
 // Контейнер
 @Composable
@@ -61,7 +62,10 @@ private fun MovieListContent(state: MovieListState) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(state.movies) { movie ->
+                    items(
+                        items = state.movies,
+                        key = { movie -> movie.id}
+                        ) { movie ->
                         MovieCard(movie)
                     }
                 }
@@ -71,11 +75,11 @@ private fun MovieListContent(state: MovieListState) {
 }
 
 @Composable
-private fun MovieCard(movie: MovieDto) {
+private fun MovieCard(movie: Movie) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column {
             AsyncImage(
-                model = TmdbConfig.buildPosterUrl(movie.poster_path),
+                model = movie.posterUrl,
                 contentDescription = movie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -88,7 +92,9 @@ private fun MovieCard(movie: MovieDto) {
                 minLines = 2,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
             )
         }
     }
@@ -104,18 +110,42 @@ private fun MovieListContentPreview() {
             state = MovieListState(
                 isLoading = false,
                 movies = listOf(
-                    MovieDto(id = 1,
-                            title = "Название",
-                            poster_path = null),
-                    MovieDto(id = 2,
-                            title = "Стандартное название",
-                            poster_path = null),
-                    MovieDto(id = 3,
-                            title = "Очень большое и длинное длинное название",
-                            poster_path = null),
-                    MovieDto(id = 4,
-                            title = "ОЧЕНЬ ДЛИННОЕ И ОЧЕНЬ БОЛЬШОЕ НАЗВАНИЕ",
-                            poster_path = null)
+                    Movie(
+                        id = 1,
+                        title = "Название",
+                        overview = "Краткое описание фильма для примера.",
+                        releaseDate = "2024-05-10",
+                        posterUrl = null,
+                        voteAverage = 7.5,
+                        genres = listOf("Драма")
+                    ),
+                    Movie(
+                        id = 2,
+                        title = "Стандартное название",
+                        overview = "Ещё одно описание.",
+                        releaseDate = "2023-01-15",
+                        posterUrl = null,
+                        voteAverage = 8.1,
+                        genres = listOf("Боевик", "Триллер")
+                    ),
+                    Movie(
+                        id = 3,
+                        title = "Очень большое и длинное длинное название",
+                        overview = "Описание.",
+                        releaseDate = "2022-11-03",
+                        posterUrl = null,
+                        voteAverage = 6.4,
+                        genres = listOf("Комедия")
+                    ),
+                    Movie(
+                        id = 4,
+                        title = "ОЧЕНЬ ДЛИННОЕ И ОЧЕНЬ БОЛЬШОЕ НАЗВАНИЕ",
+                        overview = "Описание.",
+                        releaseDate = "2021-07-20",
+                        posterUrl = null,
+                        voteAverage = 9.0,
+                        genres = listOf("Фантастика", "Приключения")
+                    )
                 )
             )
         )
