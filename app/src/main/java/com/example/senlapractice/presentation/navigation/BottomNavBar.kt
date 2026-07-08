@@ -89,6 +89,7 @@ fun AppBottomNavBar(navController: NavHostController) {
                         when (item.screen) {
                             is Screen.MovieList -> destination.hasRoute<Screen.MovieList>()
                             is Screen.Favorites -> destination.hasRoute<Screen.Favorites>()
+                            is Screen.MovieDetails -> false
                         }
                     } == true
 

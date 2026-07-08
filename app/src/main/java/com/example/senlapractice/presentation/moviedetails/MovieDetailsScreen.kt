@@ -3,22 +3,31 @@ package com.example.senlapractice.presentation.moviedetails
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,27 +41,57 @@ import com.example.senlapractice.domain.model.Movie
 
 @Composable
 fun MovieDetailsScreen(movie: Movie) {
+    var isFavorite by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // Постер на всю ширину сверху
-        AsyncImage(
-            model = movie.posterUrl,
-            contentDescription = movie.title,
-            contentScale = ContentScale.Crop,
+        // Постер + кнопка избранного
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(2f / 3f)
-        )
+        ) {
+            AsyncImage(
+                model = movie.posterUrl,
+                contentDescription = movie.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            Surface(
+                shape = CircleShape,
+                color = Color.Black.copy(alpha = 0.4f),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            ) {
+                IconButton(onClick = { isFavorite = !isFavorite }) {
+                    Icon(
+                        imageVector = if (isFavorite) {
+                            Icons.Filled.Favorite
+                        } else {
+                            Icons.Outlined.FavoriteBorder
+                        },
+                        contentDescription = if (isFavorite) {
+                            "Убрать из избранного"
+                        } else {
+                            "Добавить в избранное"
+                        },
+                        tint = if (isFavorite) Color(0xFFE53935) else Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            // Название
             Text(
                 text = movie.title,
                 style = MaterialTheme.typography.headlineSmall,
@@ -61,7 +100,6 @@ fun MovieDetailsScreen(movie: Movie) {
 
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
 
-            // Год выхода + рейтинг в одной строке
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -79,8 +117,7 @@ fun MovieDetailsScreen(movie: Movie) {
                     Icon(
                         imageVector = Icons.Default.Star,
                         contentDescription = "Рейтинг",
-                        tint = Color(0xFFFFC107),
-                        modifier = Modifier.padding(0.dp)
+                        tint = Color(0xFFFFC107)
                     )
                     Text(
                         text = "%.1f".format(movie.voteAverage),
@@ -92,13 +129,11 @@ fun MovieDetailsScreen(movie: Movie) {
 
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 16.dp))
 
-            // Жанры в виде чипов
             if (movie.genres.isNotEmpty()) {
-                Row(
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     movie.genres.forEach { genre ->
                         GenreChip(genre)
@@ -108,7 +143,6 @@ fun MovieDetailsScreen(movie: Movie) {
                 androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 20.dp))
             }
 
-            // Описание
             Text(
                 text = "Описание",
                 style = MaterialTheme.typography.titleMedium,
@@ -141,6 +175,7 @@ private fun GenreChip(text: String) {
     }
 }
 
+// Preview
 
 @Preview(showBackground = true)
 @Composable
@@ -152,10 +187,7 @@ private fun MovieDetailsScreenPreview() {
                 title = "Начало",
                 overview = "Кобб — талантливый вор, лучший из лучших в опасном искусстве " +
                         "извлечения: он крадёт ценные секреты из глубин подсознания во время " +
-                        "сна, когда человеческий разум наиболее уязвим. Редкие способности " +
-                        "Кобба сделали его нужным человеком в корпоративном шпионаже, но " +
-                        "они же превратили его в извечного беглеца и лишили всего, что он " +
-                        "когда-либо любил.",
+                        "сна, когда человеческий разум наиболее уязвим.",
                 releaseDate = "2010-07-15",
                 posterUrl = null,
                 voteAverage = 8.4,

@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
@@ -21,16 +23,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SenlaPracticeTheme {
-                val navController = rememberNavController()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = rememberNavController()
 
-                Box(modifier = Modifier.fillMaxSize()) {
-                    AppNavHost(
-                        navController = navController,
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        AppNavHost(
+                            navController = navController,
+                            modifier = Modifier.fillMaxSize()
+                        )
 
-                    Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-                        AppBottomNavBar(navController = navController)
+                        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                            AppBottomNavBar(navController = navController)
+                        }
                     }
                 }
             }
