@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,16 +33,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.core.ui.theme.ExtendedTheme
 import com.example.core.ui.theme.SenlaPracticeTheme
+import com.example.senlapractice.R
 import com.example.senlapractice.domain.model.Movie
 
 @Composable
 fun MovieDetailsScreen(movie: Movie) {
     var isFavorite by remember { mutableStateOf(false) }
+
+    val uiMovie = MovieDetailsUiMapper().map(movie, isFavorite)
 
     Column(
         modifier = Modifier
@@ -55,32 +61,30 @@ fun MovieDetailsScreen(movie: Movie) {
                 .aspectRatio(2f / 3f)
         ) {
             AsyncImage(
-                model = movie.posterUrl,
-                contentDescription = movie.title,
+                model = uiMovie.posterUrl,
+                contentDescription = uiMovie.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
 
             Surface(
                 shape = CircleShape,
-                color = Color.Black.copy(alpha = 0.4f),
+                color = ExtendedTheme.colors.posterOverlayScrim,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(16.dp)
             ) {
                 IconButton(onClick = { isFavorite = !isFavorite }) {
                     Icon(
-                        imageVector = if (isFavorite) {
-                            Icons.Filled.Favorite
-                        } else {
-                            Icons.Outlined.FavoriteBorder
+                        imageVector = when (uiMovie.favoriteButton.icon) {
+                            FavoriteIcon.Filled -> Icons.Filled.Favorite
+                            FavoriteIcon.Outlined -> Icons.Outlined.FavoriteBorder
                         },
-                        contentDescription = if (isFavorite) {
-                            "Убрать из избранного"
-                        } else {
-                            "Добавить в избранное"
+                        contentDescription = stringResource(uiMovie.favoriteButton.contentDescriptionRes),
+                        tint = when (uiMovie.favoriteButton.tint) {
+                            FavoriteTint.Favorite -> ExtendedTheme.colors.favorite
+                            FavoriteTint.OnPosterOverlay -> ExtendedTheme.colors.onPosterOverlay
                         },
-                        tint = if (isFavorite) Color(0xFFE53935) else Color.White,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -93,19 +97,19 @@ fun MovieDetailsScreen(movie: Movie) {
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Text(
-                text = movie.title,
+                text = uiMovie.title,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
 
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
+            Spacer(modifier = Modifier.padding(top = 8.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = movie.releaseDate?.take(4) ?: "Дата неизвестна",
+                    text = uiMovie.releaseYear.ifBlank { stringResource(R.string.date_unknown) },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -116,43 +120,43 @@ fun MovieDetailsScreen(movie: Movie) {
                 ) {
                     Icon(
                         imageVector = Icons.Default.Star,
-                        contentDescription = "Рейтинг",
-                        tint = Color(0xFFFFC107)
+                        contentDescription = stringResource(R.string.rating),
+                        tint = ExtendedTheme.colors.ratingStar
                     )
                     Text(
-                        text = "%.1f".format(movie.voteAverage),
+                        text = uiMovie.rating,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
             }
 
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 16.dp))
+            Spacer(modifier = Modifier.padding(top = 16.dp))
 
-            if (movie.genres.isNotEmpty()) {
+            if (uiMovie.genres.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    movie.genres.forEach { genre ->
+                    uiMovie.genres.forEach { genre ->
                         GenreChip(genre)
                     }
                 }
 
-                androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 20.dp))
+                Spacer(modifier = Modifier.padding(top = 20.dp))
             }
 
             Text(
-                text = "Описание",
+                text = stringResource(R.string.description),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
 
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.padding(top = 8.dp))
+            Spacer(modifier = Modifier.padding(top = 8.dp))
 
             Text(
-                text = movie.overview.ifBlank { "Описание отсутствует" },
+                text = uiMovie.overview.ifBlank { stringResource(R.string.description_is_missing) },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -184,11 +188,9 @@ private fun MovieDetailsScreenPreview() {
         MovieDetailsScreen(
             movie = Movie(
                 id = 27205,
-                title = "Начало",
-                overview = "Кобб — талантливый вор, лучший из лучших в опасном искусстве " +
-                        "извлечения: он крадёт ценные секреты из глубин подсознания во время " +
-                        "сна, когда человеческий разум наиболее уязвим.",
-                releaseDate = "2010-07-15",
+                title = stringResource(R.string.preview_title),
+                overview = stringResource(R.string.preview_overview),
+                releaseDate = stringResource(R.string.preview_release_date),
                 posterUrl = null,
                 voteAverage = 8.4,
                 genres = listOf("Боевик", "Фантастика", "Приключения")
