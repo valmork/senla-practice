@@ -5,13 +5,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -38,14 +41,19 @@ fun MovieListScreen(
     onMovieClick: (Movie) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-    MovieListContent(state = state, onMovieClick = onMovieClick)
+    MovieListContent(
+        state = state,
+        onMovieClick = onMovieClick,
+        onRetry = { viewModel.handleIntent(MovieListIntent.LoadMovies) }
+    )
 }
 
 // Чистый UI
 @Composable
 private fun MovieListContent(
     state: MovieListState,
-    onMovieClick: (Movie) -> Unit
+    onMovieClick: (Movie) -> Unit,
+    onRetry: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -53,10 +61,20 @@ private fun MovieListContent(
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
             state.error != null -> {
-                Text(
-                    text = "Ошибка: ${state.error}",
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = state.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 32.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = onRetry) {
+                        Text("Повторить")
+                    }
+                }
             }
             else -> {
                 LazyVerticalGrid(
@@ -109,7 +127,7 @@ private fun MovieCard(movie: Movie, onClick: () -> Unit) {
     }
 }
 
-// ===== Preview =====
+// Preview
 
 @Preview(showBackground = true)
 @Composable
@@ -139,7 +157,8 @@ private fun MovieListContentPreview() {
                     )
                 )
             ),
-            onMovieClick = {}
+            onMovieClick = {},
+            onRetry = {}
         )
     }
 }
@@ -148,7 +167,7 @@ private fun MovieListContentPreview() {
 @Composable
 private fun MovieListContentLoadingPreview() {
     SenlaPracticeTheme {
-        MovieListContent(state = MovieListState(isLoading = true), onMovieClick = {})
+        MovieListContent(state = MovieListState(isLoading = true), onMovieClick = {}, onRetry = {})
     }
 }
 
@@ -156,6 +175,10 @@ private fun MovieListContentLoadingPreview() {
 @Composable
 private fun MovieListContentErrorPreview() {
     SenlaPracticeTheme {
-        MovieListContent(state = MovieListState(error = "Не удалось загрузить данные"), onMovieClick = {})
+        MovieListContent(
+            state = MovieListState(error = "Не удалось загрузить данные"),
+            onMovieClick = {},
+            onRetry = {}
+        )
     }
 }

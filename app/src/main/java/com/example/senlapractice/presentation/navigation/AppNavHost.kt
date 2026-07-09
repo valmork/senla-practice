@@ -30,7 +30,11 @@ fun AppNavHost(
             )
         }
         composable<Screen.Favorites> {
-            FavoritesScreen()
+            FavoritesScreen(
+                onMovieClick = { movie ->
+                    navController.navigate(Screen.MovieDetails(movie))
+                }
+            )
         }
         composable<Screen.MovieDetails>(
             typeMap = mapOf(typeOf<Movie>() to MovieNavType)
