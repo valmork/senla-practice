@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,9 +41,11 @@ class MovieListViewModel @Inject constructor(
                         _state.update { it.copy(isLoading = false, movies = movies) }
                     },
                     onFailure = { throwable ->
-                        _state.update {
-                            it.copy(isLoading = false, error = throwable.message ?: "Unknown error")
+                        val errorMessage = when (throwable) {
+                            is IOException -> "Нет подключения к интернету. Проверьте соединение и попробуйте снова."
+                            else -> "Не удалось загрузить фильмы: ${throwable.message}"
                         }
+                        _state.update { it.copy(isLoading = false, error = errorMessage) }
                     }
                 )
             }

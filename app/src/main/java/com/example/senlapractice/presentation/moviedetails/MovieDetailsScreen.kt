@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.core.ui.theme.ExtendedTheme
 import com.example.core.ui.theme.SenlaPracticeTheme
@@ -44,17 +46,25 @@ import com.example.senlapractice.R
 import com.example.senlapractice.domain.model.Movie
 
 @Composable
-fun MovieDetailsScreen(movie: Movie) {
-    var isFavorite by remember { mutableStateOf(false) }
+fun MovieDetailsScreen(
+    movie: Movie,
+    viewModel: MovieDetailsViewModel = hiltViewModel(
+        creationCallback = { factory: MovieDetailsViewModel.Factory ->
+            factory.create(movie)
+        }
+    )
+) {
+    val state by viewModel.state.collectAsState()
+    val currentMovie = state.movie
+    val isFavorite = state.isFavorite
 
-    val uiMovie = MovieDetailsUiMapper().map(movie, isFavorite)
+    val uiMovie = MovieDetailsUiMapper().map(currentMovie, isFavorite)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // Постер + кнопка избранного
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -74,7 +84,7 @@ fun MovieDetailsScreen(movie: Movie) {
                     .align(Alignment.TopEnd)
                     .padding(16.dp)
             ) {
-                IconButton(onClick = { isFavorite = !isFavorite }) {
+                IconButton(onClick = { viewModel.onFavoriteClick() }) {
                     Icon(
                         imageVector = when (uiMovie.favoriteButton.icon) {
                             FavoriteIcon.Filled -> Icons.Filled.Favorite
@@ -198,3 +208,4 @@ private fun MovieDetailsScreenPreview() {
         )
     }
 }
+
